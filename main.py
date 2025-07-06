@@ -1,9 +1,11 @@
+import asyncio
 import json
 import logging
 import discord
 from discord.ext import commands
 import os
 import time
+import requests
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import random
@@ -79,13 +81,23 @@ async def on_voice_state_update(member, before, after):
         if dias_usuarios[user_id]["last_seen"] != hora_salida:
             dias_usuarios[user_id]["last_seen"] = hora_salida
             hora_entrada = dias_usuarios[user_id]["first_seen"]
-            duracion_conectado =  (hora_salida - hora_entrada) / 60
+            duracion_conectado =  round((hora_salida - hora_entrada) / 60,  2)
             actualizar_dias(user_id, hora_entrada, hora_salida, duracion_conectado)
+
+            minutos = round(dias_usuarios[user_id]["minutes"] / 60, 2)
+            segundos = round(dias_usuarios[user_id]["minutes"] % 60, 2)
+            rango = ""
+            if minutos >= 21600:
+                rango = "Rinconer"
+            elif minutos >= 14400:
+                rango = "alexgamer" 
+            elif minutos >= 7200:
+                rango = "streamer"
 
             system_channel = member.guild.system_channel
             if system_channel:
                 await system_channel.send(
-                    f"{member.mention} ha trabajado hoy un total de {dias_usuarios[user_id]['minutes']} minutos. ¡WoW, que trabajador!"
+                    f"{member.mention} ha trabajado hoy un total de {minutos} minutos y {segundos} segundos. Tu rango es: {rango}"
                 )
 
 @bot.event
@@ -124,14 +136,32 @@ async def participo(ctx):
             if ctx.voice_client is None:
                 await canal.connect()
                 voice_client =  ctx.voice_client
-                audio_source = discord.FFmpegPCMAudio("fart.mp3")
-                if not voice_client.is_playing():
-                    voice_client.play(audio_source)
-                    await ctx.send("🎶 Reproduciendo audio...")
-                else:
-                    await ctx.send("⚠️ Ya estoy reproduciendo algo.")
+                
+                audio_url = "https://cdn.pixabay.com/download/audio/2022/03/15/audio_7aaa62b0a4.mp3?filename=fart-83471.mp3"
+
+                voice_client.play(discord.FFmpegPCMAudio(audio_url), after=lambda e: print("Reproducción finalizada."))
+
+                while voice_client.is_playing():
+                    await discord.utils.sleep_until(voice_client.is_playing())
+
+                await voice_client.disconnect()
 
 
+@bot.command()
+async def limpiar_chat(ctx, cantidad: int = None):
+    if ctx.channel.id == 1391446538982527047:
+        await ctx.send("A donde vas a borrar el general gilipollas. Anda a trabajar perro muerto")
+        return
+
+    if cantidad is not None:
+        canal = await ctx.channel.purge(limit=cantidad+1)
+        confirm = await ctx.send(f"🧹 Se han eliminado {cantidad} mensajes.")
+
+    else:
+        canal = await ctx.channel.purge(limit=None)
+        confirm = await ctx.send("🧹 Todos los mensajes han sido eliminados.")
+
+    await asyncio.sleep(3)
 
 
 
