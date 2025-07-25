@@ -93,11 +93,13 @@ async def on_voice_state_update(member, before, after):
                 rango = "alexgamer" 
             elif minutos >= 7200:
                 rango = "streamer"
+            elif minutos >= 0:
+                rango = "desempleado"
 
             system_channel = member.guild.system_channel
             if system_channel:
                 await system_channel.send(
-                    f"{member.mention} ha trabajado hoy un total de {minutos} minutos y {segundos} segundos. Tu rango es: {rango}"
+                    f"{member.mention} ha trabajado un total de {dias_usuarios[user_id]["minutes"]} minutos. Tu rango es: {rango}"
                 )
 
 @bot.event
@@ -120,7 +122,7 @@ async def hola(ctx):
 
 @bot.command()
 async def participo(ctx):
-    num_rand = random.randint(1, 5)
+    num_rand = random.randint(1, 4)
     print(num_rand)
     if num_rand == 1:
         await ctx.send(f"{ctx.author.mention}, ¡Enhorabuena, has ganado un trabajo no remunerado de media joranada (12 horas)! Disfrutalo.")
@@ -145,11 +147,19 @@ async def participo(ctx):
                     await discord.utils.sleep_until(voice_client.is_playing())
 
                 await voice_client.disconnect()
+    elif num_rand == 4:
+        if ctx.author.voice:
+            print("muteado")
+            await ctx.author.edit(mute=True)
+
+            await asyncio.sleep(10)
+
+            await ctx.author.edit(mute=False)
 
 
 @bot.command()
 async def limpiar_chat(ctx, cantidad: int = None):
-    if ctx.channel.id == 1391446538982527047:
+    if ctx.channel.id == 721071163777744979:
         await ctx.send("A donde vas a borrar el general gilipollas. Anda a trabajar perro muerto")
         return
 
@@ -164,6 +174,25 @@ async def limpiar_chat(ctx, cantidad: int = None):
     await asyncio.sleep(3)
 
 
+@bot.command()
+async def minutos(ctx):
+    print("aaa")
 
+    minutos_conect = round(dias_usuarios[ctx.author.id]["minutes"] / 60, 2)
+    segundos = round(dias_usuarios[ctx.author.id]["minutes"] % 60, 2)
+    rango = ""
+
+    if minutos_conect >= 21600:
+        rango = "Rinconer"
+    elif minutos_conect >= 14400:
+        rango = "alexgamer" 
+    elif minutos_conect >= 7200:
+        rango = "streamer"
+    elif minutos_conect >= 0:
+        rango = "desempleado"
+
+    print(rango)
+    
+    await ctx.send(f"{ctx.author.mention} ha trabajado un total de {dias_usuarios[ctx.author.id]["minutes"]} minutos. Tu rango es: {rango}")
 
 bot.run(BOT_TOKEN, log_handler=handler, log_level=logging.DEBUG)
