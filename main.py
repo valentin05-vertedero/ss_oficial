@@ -147,6 +147,13 @@ async def participo(ctx):
                     await discord.utils.sleep_until(voice_client.is_playing())
 
                 await voice_client.disconnect()
+            else:
+                voice_client =  ctx.voice_client
+                
+                audio_url = "https://cdn.pixabay.com/download/audio/2022/03/15/audio_7aaa62b0a4.mp3?filename=fart-83471.mp3"
+
+                voice_client.play(discord.FFmpegPCMAudio(audio_url), after=lambda e: print("Reproducción finalizada."))
+
     elif num_rand == 4:
         if ctx.author.voice:
             print("muteado")
@@ -159,14 +166,15 @@ async def participo(ctx):
 
 @bot.command()
 async def limpiar_chat(ctx, cantidad: int = None):
-    if ctx.channel.id == 721071163777744979:
-        await ctx.send("A donde vas a borrar el general gilipollas. Anda a trabajar perro muerto")
-        return
 
     if cantidad is not None:
         canal = await ctx.channel.purge(limit=cantidad+1)
         confirm = await ctx.send(f"🧹 Se han eliminado {cantidad} mensajes.")
+        return
 
+    if ctx.channel.id == 721071163777744979 and cantidad is None:
+        await ctx.send("A donde vas a borrar el general gilipollas. Anda a trabajar perro muerto")
+        return
     else:
         canal = await ctx.channel.purge(limit=None)
         confirm = await ctx.send("🧹 Todos los mensajes han sido eliminados.")
